@@ -7,4 +7,5 @@ export interface UserInfoDto {
     name: string;
     role: string;
     jaccount: string;
+    avatar: string;
 }

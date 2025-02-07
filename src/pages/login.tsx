@@ -4,6 +4,7 @@ import { ApiOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { MessageContext } from "@/contexts/message";
 import QRCode from 'qrcode';
 import bg from '@/assets/students_center.jpg';
+import mcbg from '@/assets/xxf-mc-bg.jpg';
 import logo from '@/assets/tboxtransfer-logo.png';
 import UserContext from "@/contexts/user";
 import {
@@ -125,17 +126,17 @@ export default function Login() {
       },
     }}
   >
-  <Layout style={{ backgroundImage: `url(${bg})`, backgroundSize: "cover", height: '100vh', width: '100vw' }}>
+  <Layout style={{ backgroundImage: `url(${mcbg})`, backgroundSize: "cover", height: '100vh', width: '100vw' }}>
     <Content style={{ 
       display: "flex", 
       justifyContent: "flex-start", 
       alignItems: "center", 
       height: "calc(100vh - 64px)" }}>
       <div style={{ 
-        width: 420, 
+        width: 400, 
         height: 500, 
         margin: "0 0 0 15vw", 
-        padding: "0 16px 0 16px", 
+        padding: "0", 
         backdropFilter: 'blur(20px)',
         border: 'none'
       }}>
@@ -154,7 +155,8 @@ export default function Login() {
     </Content>
     <div style={{position: "relative"}}>
       <div style={{position: "absolute", bottom: 4, right: 16}}>
-        <p style={{color: "#CCC"}}>Photo by @Nereise</p>
+        {/* <p style={{color: "#CCC"}}>Photo by @Nereise</p> */}
+        <p style={{color: "#EEE", textShadow: "1px 1px 10px #000"}}>Photo by 上海交通大学 Minecraft 社</p>
       </div>
     </div>
   </Layout>

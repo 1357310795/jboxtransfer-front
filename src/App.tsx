@@ -9,6 +9,8 @@ import Tbox from "./pages/tbox";
 import "@/styles/index.css";
 import "@/styles/antd.override.css";
 import Login from "./pages/login";
+import Query from "./pages/query";
+import Setting from "./pages/setting";
 
 const router = createBrowserRouter([
   {
@@ -22,12 +24,25 @@ const router = createBrowserRouter([
         errorElement: <ErrorPage />,
         children: [
           {
+            path: "",
+            index: true, 
+            element: <Index /> 
+          },
+          {
             path: "start",
             element: <Start />,
           },
           {
             path: "task",
             element: <TaskList />,
+          },
+          {
+            path: "query",
+            element: <Query />,
+          },
+          {
+            path: "setting",
+            element: <Setting />,
           },
           {
             path: "jbox",

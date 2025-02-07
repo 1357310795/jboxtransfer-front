@@ -1,3 +1,6 @@
+export type SyncTaskState = "Wait" | "Running" | "Error" | "Complete" | "Pause"
+export type SyncTaskDbState = "Idle" | "Pending" | "Busy" | "Error" | "Done" | "Cancel"
+
 export interface SyncTask {
     id: number;
     fileName: string;
@@ -12,8 +15,15 @@ export interface SyncTask {
     type: string;
 }
 
-export type SyncTaskState = "Wait" | "Running" | "Error" | "Complete" | "Pause"
-
 export interface SyncTaskDbModel {
-    //Todo
+    id: number;
+    fileName: string;
+    filePath: string;
+    parentPath: string;
+    progress: number;
+    state: SyncTaskDbState;
+    message: string;
+    type: string;
+    creationTime: string;
+    updateTime: string;
 }

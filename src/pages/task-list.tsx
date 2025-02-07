@@ -585,16 +585,21 @@ export default function TaskList(props: any) {
           rowKey="id"
           pagination={{
             showQuickJumper: true,
+            pageSize: 200
           }}
           columns={columns}
           search={false}
-          dateFormatter="string"
           headerTitle={
             getCurrentTabAction()
           }
           toolBarRender={() => [
             
           ]}
+          footer={
+            () => (
+              <div>ddd</div>
+            )
+          }
         />
       </div>
     </PageContainer>
