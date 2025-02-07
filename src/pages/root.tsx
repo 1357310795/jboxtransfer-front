@@ -48,6 +48,11 @@ const menuProps = {
               name: '任务列表',
               icon: <SmileFilled />,
             },
+            {
+              path: '/main/query',
+              name: '任务查询',
+              icon: <SmileFilled />,
+            },
           ]
         },
         {
@@ -263,11 +268,12 @@ export default function Root(props: any) {
                 );
               }}
               onMenuHeaderClick={(e) => console.log(e)}
+              menuProps={{selectedKeys: [loc.pathname]}}
               menuItemRender={(item, dom) => (
                 <div
                   onClick={() => {
-                    setPathname(item.path || '/welcome');
-                    nav(item.path || '/start');
+                    setPathname(item.path || '/main/start');
+                    nav(item.path || '/main/start');
                   }}
                 >
                   {dom}
@@ -275,41 +281,7 @@ export default function Root(props: any) {
               )}
               {...settings}
             >
-              <PageContainer
-                token={{
-                  paddingInlinePageContainerContent: num,
-                }}
-                extra={[
-                  <Button key="3">操作</Button>,
-                  <Button key="2">操作</Button>,
-                  <Button
-                    key="1"
-                    type="primary"
-                    onClick={() => {
-                      setNum(num > 0 ? 0 : 40);
-                    }}
-                  >
-                    主操作
-                  </Button>,
-                ]}
-                subTitle="简单的描述"
-                // footer={[
-                //   <Button key="3">重置</Button>,
-                //   <Button key="2" type="primary">
-                //     提交
-                //   </Button>,
-                // ]}
-              >
-                <ProCard
-                  style={{
-                    height: '200vh',
-                    minHeight: 800,
-                  }}
-                >
-                  <Outlet />
-                </ProCard>
-              </PageContainer>
-  
+              <Outlet />
               <SettingDrawer
                 pathname={pathname}
                 enableDarkTheme

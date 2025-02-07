@@ -7,6 +7,8 @@ import TaskList from "./pages/task-list";
 import Jbox from "./pages/jbox";
 import Tbox from "./pages/tbox";
 import "@/styles/index.css";
+import "@/styles/antd.override.css";
+import Login from "./pages/login";
 
 const router = createBrowserRouter([
   {
@@ -48,10 +50,10 @@ const router = createBrowserRouter([
     index: true, 
     element: <Index /> 
   },
-  // {
-  //   path: "/signin",
-  //   element: <SignIn />,
-  // },
+  {
+    path: "/login",
+    element: <Login />,
+  },
   // {
   //   path: "/signup",
   //   element: <SignUp />,
