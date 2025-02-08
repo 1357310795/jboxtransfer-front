@@ -4,9 +4,9 @@ import { SyncTask, SyncTaskState } from "@/models/sync-task/sync-task";
 import { taskListCancelAll, taskListCancelAllErr, taskListDeleteAllDone, taskListInfo, taskListPauseAll, taskListRestartAllErr, taskListStartAll } from "@/services/task-list";
 import FileIcon from "@/utils/fileicon";
 import { PageContainer, ProColumns, ProTable, TableDropdown } from "@ant-design/pro-components";
-import { Button, Flex, Space, Typography, Image, Progress, Dropdown, Popconfirm, Modal } from "antd";
+import { Button, Flex, Space, Typography, Image, Progress, Dropdown, Popconfirm, Modal, Tooltip } from "antd";
 import { useContext, useEffect, useRef, useState } from "react"
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import folderIcon from "@/assets/folder.svg";
 import { CloseCircleFilled, CopyOutlined, ExportOutlined, PauseCircleFilled, PlayCircleFilled, PlayCircleOutlined, SyncOutlined } from "@ant-design/icons";
 import prettyBytes from "pretty-bytes";
@@ -23,6 +23,7 @@ export default function TaskList(props: any) {
   const [selectedTab, setSelectedTab] = useState<string>("transferring");
   const [busyButton, setBusyButton] = useState<string>("");
   const [restartModalOpen, setRestartModalOpen] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(false);
 
   const getCurrentTabAction = () => {
     switch (selectedTab)
@@ -233,6 +234,36 @@ export default function TaskList(props: any) {
     }
   }
 
+  const getCustomProgressText = (down: number, up: number, total: number, type: string) => {
+    if (type == "File")
+      return (
+        <Tooltip title={
+          <>
+            <div>{`已下载：${down} Bytes`}</div>
+            <div>{`已上传：${up} Bytes`}</div>
+            <div>{`文件大小：${total} Bytes`}</div>
+          </>
+        }>
+          <Typography.Text style={{lineHeight: '1em'}}>
+            {`${prettyBytes(down, {binary: true})} / ${prettyBytes(up, {binary: true})} / ${prettyBytes(total, {binary: true})}`}
+          </Typography.Text>
+        </Tooltip>
+      )
+    else 
+      return (
+        <Tooltip title={
+          <>
+            <div>{`已同步：${down} 个子文件（夹）`}</div>
+            <div>{`总计：${total} 个子文件（夹）`}</div>
+          </>
+        }>
+          <Typography.Text style={{lineHeight: '1em'}}>
+            {`${down} pcs / ${total} pcs`}
+          </Typography.Text>
+        </Tooltip>
+      )
+  }
+
   const columns: ProColumns<SyncTask>[] = [
     {
       title: '文件名',
@@ -265,9 +296,7 @@ export default function TaskList(props: any) {
       render: (_, entity) => (
         <Space size={0} direction="vertical" style={{width: '100%', lineHeight: '1em', paddingRight: '20px'}}>
           <Progress strokeColor={(entity.state != "Running" ? "grey" : undefined)} percent={Math.round(entity.progress * 10000) / 100} status={(entity.state == "Running" ? "active" : undefined)} />
-          <Typography.Text style={{lineHeight: '1em'}}>
-            {`${prettyBytes(entity.downloadedBytes, {binary: true})} / ${prettyBytes(entity.uploadedBytes, {binary: true})} / ${prettyBytes(entity.totalBytes, {binary: true})}`}
-          </Typography.Text>
+          {getCustomProgressText(entity.downloadedBytes, entity.uploadedBytes, entity.totalBytes, entity.type)}
         </Space>
       )
     },
@@ -278,9 +307,7 @@ export default function TaskList(props: any) {
       render: (_, entity) => (
         <Space size={0} direction="vertical" style={{width: '100%', lineHeight: '1em', paddingRight: '20px'}}>
           <Progress percent={Math.round(entity.progress * 10000) / 100} status="success" />
-          <Typography.Text style={{lineHeight: '1em'}}>
-            {`${prettyBytes(entity.downloadedBytes, {binary: true})} / ${prettyBytes(entity.uploadedBytes, {binary: true})} / ${prettyBytes(entity.totalBytes, {binary: true})}`}
-          </Typography.Text>
+          {getCustomProgressText(entity.downloadedBytes, entity.uploadedBytes, entity.totalBytes, entity.type)}
         </Space>
       )
     },
@@ -319,7 +346,22 @@ export default function TaskList(props: any) {
 
   const updateData = (listType: string) => {
     taskListInfo(listType)
-      .then((data) => { setTaskListData(data.entities); })
+      .then((data) => { 
+        if (selectedTab == "transferring")
+        {
+          setHasMore(data.hasMore);
+          setTaskListData(data.entities.filter(x => x.state != "Error" && x.state != "Complete"));
+        }
+        else if (selectedTab == "completed")
+        {
+          setHasMore(data.hasMore);
+          setTaskListData(data.entities);
+        }
+        else if (selectedTab == "error")
+        {
+          setTaskListData(data.entities);
+        }
+      })
       .catch((err) => { 
         if (err == "NotLoginedError")
         {
@@ -596,9 +638,9 @@ export default function TaskList(props: any) {
             
           ]}
           footer={
-            () => (
-              <div>ddd</div>
-            )
+            hasMore ? (() => (
+              <p>列表仅显示前 {taskListData.length} 项，如需查看更多，请前往<Link to="/main/query">任务查询</Link>页面。</p>
+            )) : undefined
           }
         />
       </div>

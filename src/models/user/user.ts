@@ -9,3 +9,9 @@ export interface UserInfoDto {
     jaccount: string;
     avatar: string;
 }
+
+export interface UserStatDto {
+    totalTransferredBytes: number;
+    jboxSpaceUsedBytes: number;
+    onlyFullTransfer: boolean;
+}

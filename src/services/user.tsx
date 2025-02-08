@@ -1,5 +1,5 @@
 import { OutputDto } from "@/models/common";
-import { JaccountQrCodeDataDto, UserInfoDto } from "@/models/user/user";
+import { JaccountQrCodeDataDto, UserInfoDto, UserStatDto } from "@/models/user/user";
 import { objectToFormData } from "@/utils/formhelper";
 import axios from "axios";
 
@@ -79,6 +79,25 @@ export async function userLoginByJacValidate(uuid: string) {
     return resp.data.result;
   } catch (error) {
     var errmessage = `验证失败：${error}`
+    throw errmessage;
+  }
+};
+  
+//获取统计数据
+export async function userGetStatistics() {
+  try {
+    const resp = await axios.get<OutputDto<UserStatDto>>(
+      baseurl + '/user/stat',
+      {withCredentials : true}
+    )
+    
+    if (resp.status != 200) throw `请求失败`;
+    if (resp.data.isError) throw `${resp.data.message}`;
+    if (!resp.data.result) throw `数据为空`;
+
+    return resp.data.result;
+  } catch (error) {
+    var errmessage = `获取统计数据失败：${error}`
     throw errmessage;
   }
 };

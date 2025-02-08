@@ -1,5 +1,6 @@
 import { ListOutputDto, OutputDto } from "@/models/common";
 import { SyncTask } from "@/models/sync-task/sync-task";
+import { SyncTaskListDto } from "@/models/sync-task/sync-task-list";
 import { objectToFormData } from "@/utils/formhelper";
 import axios from "axios";
 
@@ -8,7 +9,7 @@ const baseurl = import.meta.env.VITE_API_URI;
 //获取任务列表信息
 export async function taskListInfo(type: string) {
   try {
-    const resp = await axios.get<ListOutputDto<SyncTask>>(
+    const resp = await axios.get<OutputDto<SyncTaskListDto>>(
       baseurl + '/tasklist/list?type=' + type,
       {withCredentials : true}
     )

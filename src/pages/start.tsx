@@ -3,12 +3,42 @@ import logo from "@/assets/tboxtransfer-logo.png"
 import { CloudSyncOutlined, FolderAddOutlined, GlobalOutlined, LoginOutlined } from "@ant-design/icons";
 import FeatureCard from "@/components/feature-card";
 import { Link, useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import UserContext from "@/contexts/user";
+import { UserStatDto } from "@/models/user/user";
+import { userGetStatistics } from "@/services/user";
+import { MessageContext } from "@/contexts/message";
+import prettyBytes from "pretty-bytes";
 
 export default function Start(props: any) {
 	const nav = useNavigate();
 	const user = useContext(UserContext);
+	const message = useContext(MessageContext);
+	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+	const [stat, setStat] = useState<UserStatDto | undefined>(undefined);
+
+	useEffect(()=>{
+		if (user.logined)
+		{
+			updateData();
+			const id = setInterval(() => {
+				updateData();
+			}, 10000);
+			setTimer(id);
+
+			return () => {
+				clearInterval(id);
+				setTimer(null);
+			};
+		}
+	}, [user.logined]);
+
+	const updateData = () => {
+		userGetStatistics()
+			.then((data) => { setStat(data); })
+			.catch((err) => { message.error(err); })
+	}
+
 	if (!user.logined)
 	{
 		return (
@@ -68,20 +98,26 @@ export default function Start(props: any) {
 						</Button>
 					</Space>
 				</Space>
-				<Divider type="vertical" style={{height: '200px'}}></Divider>
-				<Space size={24} direction='vertical' align="center" >
-					<Typography.Title level={4}>
-						正在全量迁移中
-					</Typography.Title>
-					<Progress type="dashboard" percent={75} />
-					<Typography.Title level={5}>
-						114 GiB / 514 GiB
-					</Typography.Title>
-					<Typography.Text>
-						可前往<Link to={"/main/task"}>任务列表</Link>查看详细信息
-					</Typography.Text>
-				</Space>
+				{ stat &&
+					<Divider type="vertical" style={{height: '200px'}}></Divider>
+				}
+				{ stat &&
+					<Space size={24} direction='vertical' align="center" >
+						<Typography.Title level={4}>
+							{stat.onlyFullTransfer ? "正在全量迁移中" : "正在迁移中"}
+						</Typography.Title>
+						<Progress type="dashboard" percent={Math.round(stat.totalTransferredBytes / stat.jboxSpaceUsedBytes * 10000) / 100} />
+						<Typography.Title level={5}>
+							{prettyBytes(stat.totalTransferredBytes, { binary: true })} / {prettyBytes(stat.jboxSpaceUsedBytes, { binary: true })}
+						</Typography.Title>
+						<Typography.Text>
+							可前往<Link to={"/main/task"}>任务列表</Link>查看详细信息
+						</Typography.Text>
+					</Space>
+				}
 			</Space>
 		</div>
 	)
 }
+
+
