@@ -3,12 +3,25 @@ import { ModalContext } from "@/contexts/modal";
 import { NotificationContext } from "@/contexts/notification";
 import { SyncTaskDbModel } from "@/models/sync-task/sync-task";
 import { PageContainer, ProColumns, ProTable, TableDropdown } from "@ant-design/pro-components";
-import { Button, Flex, Image, Space, Typography } from "antd";
+import { Button, Dropdown, Flex, Image, Space, Tooltip, Typography } from "antd";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import folderIcon from "@/assets/folder.svg";
 import FileIcon from "@/utils/fileicon";
-import { CloseCircleFilled, PauseCircleFilled, PlayCircleFilled } from "@ant-design/icons";
+import { CloseCircleFilled, CopyOutlined, ExportOutlined, PauseCircleFilled, PlayCircleFilled, RedoOutlined, SyncOutlined, VerticalAlignTopOutlined } from "@ant-design/icons";
+import { taskListSearch } from "@/services/task-list";
+import prettyBytes from "pretty-bytes";
+import { taskCancel, taskJboxLink, taskSetTop, taskTboxLink } from "@/services/task";
+
+const stateQueryValueEnum = {
+  All: { text: '全部' },
+  Idle: { text: '等待中', status: 'default' },
+  Pending: { text: '排队中', color: 'cyan' },
+  Busy: { text: '传输中', status: 'Processing' },
+  Error: { text: '已停止', color: 'red' },
+  Done: { text: '已完成', color: 'green' },
+  Cancel: { text: '已取消', color: 'magenta' },
+};
 
 export default function Query(props: any) {
 	const nav = useNavigate();
@@ -22,50 +35,108 @@ export default function Query(props: any) {
     switch (entity.state)
     {
       case "Idle":
+      case "Pending":
+      case "Busy":
         return [
-          (entity.state == "Running" ? 
-            <Button 
-              variant="outlined" 
-              style={{padding: '4px 8px'}} 
-              color="default" 
-              icon={<PauseCircleFilled />}
-              loading={busyButton == `pauseone_${entity.id}`}
-              onClick={()=>{  }}
-            >
-              暂停
-            </Button>
-            : 
-            <Button 
-              variant="outlined" 
-              style={{padding: '4px 8px'}} 
-              color="default" 
-              icon={<PlayCircleFilled />}
-              loading={busyButton == `startone_${entity.id}`}
-              onClick={()=>{  }}
-            >
-              继续
-            </Button>
-          ),
+          <Button 
+            variant="outlined" 
+            style={{padding: '4px 8px'}} 
+            color="default" 
+            icon={<VerticalAlignTopOutlined />}
+            loading={busyButton == `settop_${entity.id}`}
+            onClick={()=>{ onSetTop(entity.id) }}
+          >
+            优先传输
+          </Button>,
           <Button 
             variant="outlined" 
             style={{padding: '4px 8px'}} 
             color="default" 
             icon={<CloseCircleFilled />}
             loading={busyButton == `cancelone_${entity.id}`}
-            onClick={()=>{  }}
+            onClick={()=>{ onCancelOne(entity.id) }}
           >
             取消
           </Button>,
           <TableDropdown
             key="actionGroup"
             menus={[
-              // { key: 'settop', name: '优先传输', onClick: () => {onSetTop(entity.id)}, disabled: (busyButton == `settop_${entity.id}`) },
-              // { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
-              // { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
-              // { key: 'copypath', name: '复制完整路径', onClick: () => {onCopyPath(entity)} },
+              { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
+              { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
+              { key: 'copypath', name: '复制完整路径', onClick: () => {onCopyPath(entity)} },
             ]}
           />,
         ];
+      case "Done": 
+        return [
+          <Dropdown 
+            placement="bottomLeft" 
+            arrow
+            menu={{items: [
+              { key: 'openinjbox', label: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
+              { key: 'openintbox', label: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
+            ]}}
+          >
+            <Button 
+              variant="outlined" 
+              style={{padding: '4px 8px'}} 
+              color="default" 
+              icon={<ExportOutlined />}
+            >
+              打开
+            </Button>
+          </Dropdown>,
+          <Button 
+            variant="outlined" 
+            style={{padding: '4px 8px'}} 
+            color="default" 
+            icon={<CopyOutlined />}
+            onClick={()=>{onCopyPath(entity)}}
+          >
+            复制完整路径
+          </Button>
+        ];
+      case "Cancel":
+        return [
+          <Button 
+            variant="outlined" 
+            style={{padding: '4px 8px'}} 
+            color="default" 
+            icon={<RedoOutlined />}
+            onClick={()=>{ /* Todo */ }}
+          >
+            重新添加任务
+          </Button>,
+          <Button 
+            variant="outlined" 
+            style={{padding: '4px 8px'}} 
+            color="default" 
+            icon={<CopyOutlined />}
+            onClick={()=>{onCopyPath(entity)}}
+          >
+            复制完整路径
+          </Button>
+        ];
+      case "Error":
+        return [
+          <Button 
+            variant="outlined" 
+            style={{padding: '4px 8px'}} 
+            color="default" 
+            icon={<SyncOutlined />}
+            onClick={()=>{ message.info("请前往任务列表进行操作！") }}
+          >
+            重试
+          </Button>,
+          <TableDropdown
+            key="actionGroup"
+            menus={[
+              { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
+              { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
+              { key: 'copypath', name: '复制完整路径', onClick: ()=>{onCopyPath(entity)} },
+            ]}
+          />
+        ]
       default: return [];
     }
   }
@@ -74,7 +145,9 @@ export default function Query(props: any) {
     {
       title: '文件名',
       width: 240,
+      key: 'file',
       ellipsis: true,
+      search: false,
       render: (_, entity) => (
         <Flex gap={8} align="center" style={{justifyContent: 'flex-start', width: '100%'}} >
           <div style={{flex: '0'}}>
@@ -96,18 +169,59 @@ export default function Query(props: any) {
       )
     },
     {
+      title: '搜索关键词',
+      key: 'search',
+      hideInForm: true,
+      hideInTable: true,
+      valueType: "text",
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '此项为必填项',
+          },
+        ],
+      },
+    },
+    {
       title: '状态',
-      width: 160,
-      render: (_, entity) => (
-        undefined
-      )
+      width: 40,
+      key: 'state',
+      valueType: "select",
+      dataIndex: "state",
+      render: (dom, entity) => (
+        <Tooltip title={(entity.state == "Error" ? entity.message : undefined)}>
+          <div>{dom}</div>
+        </Tooltip>
+      ),
+      valueEnum: stateQueryValueEnum,
     },
     {
       title: '创建日期',
-      width: 160,
-			hideInTable: true,
+      width: 80,
+      key: 'creationTime',
+      dataIndex: "creationTime",
+      valueType: "dateTime",
+      hideInTable: true,
+      hideInForm: true,
+      search: false,
+    },
+    {
+      title: '更新日期',
+      width: 80,
+      key: 'updateTime',
+      dataIndex: "updateTime",
+      valueType: "dateTime",
+      search: false,
+    },
+    {
+      title: '大小',
+      width: 40,
+      key: 'size',
+      dataIndex: "size",
+      search: false,
       render: (_, entity) => (
-        undefined
+        entity.type == "File" ? prettyBytes(entity.size, {binary: true}) : "-"
       )
     },
     {
@@ -118,7 +232,68 @@ export default function Query(props: any) {
       render: (_, entity) => getItemAction(entity)
     },
   ];
-	
+
+  const onCancelOne = (id: number) => {
+    setBusyButton(`cancelone_${id}`);
+    taskCancel(id)
+      .then((data) => { 
+        message.success("操作成功"); 
+      })
+      .catch((err) => { 
+        message.error(err); 
+      })
+      .finally(()=>{
+        setBusyButton("");
+      });
+  };
+
+  const onSetTop = (id: number) => {
+    setBusyButton(`settop_${id}`);
+    taskSetTop(id)
+      .then((data) => { 
+        message.success("操作成功"); 
+      })
+      .catch((err) => { 
+        message.error(err); 
+      })
+      .finally(()=>{
+        setBusyButton("");
+      });
+  };
+  
+  const onGetJboxLink = (id: number) => {
+    setBusyButton(`jboxlink_${id}`);
+    taskJboxLink(id)
+      .then((data) => { 
+        // 打开新网页
+      })
+      .catch((err) => { 
+        message.error(err); 
+      })
+      .finally(()=>{
+        setBusyButton("");
+      });
+  };
+  
+  const onGetTboxLink = (id: number) => {
+    setBusyButton(`tboxlink_${id}`);
+    taskTboxLink(id)
+      .then((data) => { 
+        // 打开新网页
+      })
+      .catch((err) => { 
+        message.error(err); 
+      })
+      .finally(()=>{
+        setBusyButton("");
+      });
+  };
+
+  const onCopyPath = (entity: SyncTaskDbModel) => {
+    window.navigator.clipboard.writeText(entity.filePath); 
+    message.info("已复制到剪切板");
+  }
+  
 	return (
     <>
     <PageContainer
@@ -130,18 +305,28 @@ export default function Query(props: any) {
       <div>
         <ProTable<SyncTaskDbModel>
           request={async (params, sort, filter) => {
-						// console.log(sort, filter);
-						// await waitTime(2000);
-						// return request<{
-						// 	data: GithubIssueItem[];
-						// }>('https://proapi.azurewebsites.net/github/issues', {
-						// 	params,
-						// });
+						if (params.search == undefined)
+            {
+              message.info("请输入搜索关键词");
+              return { success: false };
+            }
+            try {
+              var res = await taskListSearch(params);
+              return {
+                data: res.entities,
+                success: true,
+                total: res.total,
+              }
+            }
+            catch (ex)
+            {
+              message.error(`${ex}`);
+              return { success: false };
+            }
 					}}
           rowKey="id"
           pagination={{
             showQuickJumper: true,
-            pageSize: 50
           }}
           columns={columns}
           search={undefined}

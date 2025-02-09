@@ -1,5 +1,5 @@
-import { ListOutputDto, OutputDto } from "@/models/common";
-import { SyncTask } from "@/models/sync-task/sync-task";
+import { ListOutputDto, OutputDto, PartialListOutputDto } from "@/models/common";
+import { SyncTask, SyncTaskDbModel } from "@/models/sync-task/sync-task";
 import { SyncTaskListDto } from "@/models/sync-task/sync-task-list";
 import { objectToFormData } from "@/utils/formhelper";
 import axios from "axios";
@@ -137,6 +137,26 @@ export async function taskListDeleteAllDone() {
     return resp.data.result;
   } catch (error) {
     var errmessage = `删除已完成任务失败：${error}`
+    throw errmessage;
+  }
+};
+
+//查询任务
+export async function taskListSearch(data: any) {
+  try {
+    const resp = await axios.post<PartialListOutputDto<SyncTaskDbModel>>(
+      baseurl + '/tasklist/querydb',
+      objectToFormData(data),
+      {withCredentials : true},
+    )
+    
+    if (resp.status != 200) throw `请求失败`;
+    if (resp.data.isError) throw `${resp.data.message}`;
+    if (!resp.data.result) throw `数据为空`;
+
+    return resp.data.result;
+  } catch (error) {
+    var errmessage = `查询任务失败：${error}`
     throw errmessage;
   }
 };

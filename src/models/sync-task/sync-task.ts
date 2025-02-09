@@ -24,6 +24,7 @@ export interface SyncTaskDbModel {
     state: SyncTaskDbState;
     message: string;
     type: string;
+    size: number;
     creationTime: string;
     updateTime: string;
 }

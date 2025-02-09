@@ -4,7 +4,7 @@ import { SyncTask, SyncTaskState } from "@/models/sync-task/sync-task";
 import { taskListCancelAll, taskListCancelAllErr, taskListDeleteAllDone, taskListInfo, taskListPauseAll, taskListRestartAllErr, taskListStartAll } from "@/services/task-list";
 import FileIcon from "@/utils/fileicon";
 import { PageContainer, ProColumns, ProTable, TableDropdown } from "@ant-design/pro-components";
-import { Button, Flex, Space, Typography, Image, Progress, Dropdown, Popconfirm, Modal, Tooltip } from "antd";
+import { Button, Flex, Space, Typography, Image, Progress, Dropdown, Popconfirm, Modal, Tooltip, Badge } from "antd";
 import { useContext, useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom";
 import folderIcon from "@/assets/folder.svg";
@@ -24,6 +24,10 @@ export default function TaskList(props: any) {
   const [busyButton, setBusyButton] = useState<string>("");
   const [restartModalOpen, setRestartModalOpen] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [runningCount, setRunningCount] = useState<number>(0);
+  const [completedCount, setCompletedCount] = useState<number>(0);
+  const [errorCount, setErrorCount] = useState<number>(0);
 
   const getCurrentTabAction = () => {
     switch (selectedTab)
@@ -226,7 +230,7 @@ export default function TaskList(props: any) {
             menus={[
               { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
               { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
-              { key: 'copypath', name: '复制完整路径' },
+              { key: 'copypath', name: '复制完整路径', onClick: ()=>{onCopyPath(entity)} },
             ]}
           />,
         ];
@@ -347,6 +351,10 @@ export default function TaskList(props: any) {
   const updateData = (listType: string) => {
     taskListInfo(listType)
       .then((data) => { 
+        setIsLoading(false);
+        setRunningCount(data.runningCount);
+        setCompletedCount(data.completedCount);
+        setErrorCount(data.errorCount);
         if (selectedTab == "transferring")
         {
           setHasMore(data.hasMore);
@@ -599,7 +607,7 @@ export default function TaskList(props: any) {
       extra={[
 				
       ]}
-      subTitle="简单的描述"
+      // subTitle="简单的描述"
       tabList={[
         {
           tab: '传输中',
@@ -610,13 +618,17 @@ export default function TaskList(props: any) {
           key: 'completed',
         },
         {
-          tab: '已停止',
+          tab: (
+            <Badge size="small" offset={[8, 0]} count={errorCount}>
+              已停止
+            </Badge>
+          ),
           key: 'error',
         },
       ]}
       onTabChange={(x) => { 
-        console.log(x)
         setSelectedTab(x);
+        setIsLoading(true);
         setTaskListData([]);
         updateData(x);
       }}
@@ -625,6 +637,7 @@ export default function TaskList(props: any) {
         <ProTable<SyncTask>
           dataSource={taskListData}
           rowKey="id"
+          loading={isLoading}
           pagination={{
             showQuickJumper: true,
             pageSize: 200
