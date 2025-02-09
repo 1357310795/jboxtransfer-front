@@ -1,4 +1,4 @@
-import { Flex, Space, Image, Typography, Button, Row, Col, Divider, Progress, Tooltip } from "antd";
+import { Space, Image, Typography, Button, Row, Col, Divider, Progress, Tooltip, Modal } from "antd";
 import logo from "@/assets/tboxtransfer-logo.png"
 import { CloudSyncOutlined, FolderAddOutlined, GlobalOutlined, InfoCircleFilled, LoginOutlined } from "@ant-design/icons";
 import FeatureCard from "@/components/feature-card";
@@ -9,11 +9,13 @@ import { UserStatDto } from "@/models/user/user";
 import { userGetStatistics } from "@/services/user";
 import { MessageContext } from "@/contexts/message";
 import prettyBytes from "pretty-bytes";
+import { taskAdd } from "@/services/task";
 
-export default function Start(props: any) {
+export default function Start() {
 	const nav = useNavigate();
 	const user = useContext(UserContext);
 	const message = useContext(MessageContext);
+	const [modal, contextHolder] = Modal.useModal();
 	const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 	const [stat, setStat] = useState<UserStatDto | undefined>(undefined);
 
@@ -37,6 +39,28 @@ export default function Start(props: any) {
 		userGetStatistics()
 			.then((data) => { setStat(data); })
 			.catch((err) => { message.error(err); })
+	}
+
+	const onAddTask = (path: string) => {
+		taskAdd(path)
+			.then((data) => { 
+				message.info("添加成功，请前往“任务列表”页面启动队列！");
+			})
+			.catch((err) => { 
+				message.error(err); 
+			})
+			.finally(()=>{
+			});
+	};
+
+	const onTransferAll = () => {
+		modal.confirm({
+			title: "确认开始迁移所有文件？",
+			okText: "确认",
+			cancelText: "取消",
+			onOk: () => { onAddTask("/"); },
+			onCancel: () => {},
+		});
 	}
 
 	if (!user.logined)
@@ -78,6 +102,8 @@ export default function Start(props: any) {
 		)
 	}
   return (
+		<>
+		{contextHolder}
 		<div className="logo-container">
 			<Space size={48} direction="horizontal" align="center">
 				<Space size={12} direction='vertical' align="center" 
@@ -90,10 +116,10 @@ export default function Start(props: any) {
 						高效、安全、便捷地转移您的文件
 					</Typography.Title>
 					<Space size={12} style={{marginTop: '24px', width: '100%'}}>
-						<Button type="primary" block size="large" icon={<CloudSyncOutlined/>}>
+						<Button type="primary" block size="large" icon={<CloudSyncOutlined/>} onClick={onTransferAll}>
 							一键迁移所有文件
 						</Button>
-						<Button block size="large" icon={<FolderAddOutlined/>}>
+						<Button block size="large" icon={<FolderAddOutlined/>} onClick={()=>{ nav("/main/jbox"); }}>
 							选择文件夹迁移
 						</Button>
 					</Space>
@@ -123,6 +149,7 @@ export default function Start(props: any) {
 				}
 			</Space>
 		</div>
+		</>
 	)
 }
 

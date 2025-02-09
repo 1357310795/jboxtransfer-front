@@ -45,7 +45,7 @@ export default function Jbox() {
           setAddTaskModalOpen(true);
         }}
       >
-        同步
+        迁移
       </Button>
       <TableDropdown
         key="actionGroup"

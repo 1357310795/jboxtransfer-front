@@ -27,7 +27,7 @@ interface TableParams {
 }
 
 const stateEnums: {[key: string]: BadgeProps} = {
-  None: { text: '未同步', status: 'default', color: undefined },
+  None: { text: '未迁移', status: 'default', color: undefined },
   Idle: { text: '等待中', status: undefined, color: 'cyan' },
   Pending: { text: '排队中', status: undefined, color: 'purple' },
   Busy: { text: '传输中', status: 'processing', color: undefined },
@@ -241,7 +241,7 @@ export default function CloudFileList(props: CloudFileListProps) {
     <>
     <Modal
       open={props.addTaskModalOpen}
-      title="请确认待同步的文件/文件夹路径"
+      title="请确认待迁移的文件/文件夹路径"
       onOk={() => {onAddTask(props.addTaskPath);}}
       okButtonProps={{loading: (busyButton == `addtask`)}}
       onCancel={() => {props.setAddTaskModalOpen(false);}}

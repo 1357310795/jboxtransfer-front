@@ -258,7 +258,7 @@ export default function TaskList(props: any) {
       return (
         <Tooltip title={
           <>
-            <div>{`已同步：${down} 个子文件（夹）`}</div>
+            <div>{`已迁移：${down} 个子文件（夹）`}</div>
             <div>{`总计：${total} 个子文件（夹）`}</div>
           </>
         }>
