@@ -1,9 +1,10 @@
-import { useContext, useEffect, useState } from "react";
-import { Card, Layout, Button, Form, Input, Space, Flex, Typography, Avatar, ConfigProvider, Image, Divider } from "antd";
-import { ApiOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Card, Layout, Button, Form, Input, Space, Flex, Typography, Avatar, ConfigProvider, Image, Divider, Spin, Result } from "antd";
+import { ApiOutlined, LockOutlined, MoonOutlined, UserOutlined } from "@ant-design/icons";
 import { MessageContext } from "@/contexts/message";
 import QRCode from 'qrcode';
 import bg from '@/assets/students_center.jpg';
+import code_inactive from '@/assets/code_inactive.png'
 import mcbg from '@/assets/xxf-mc-bg.jpg';
 import logo from '@/assets/tboxtransfer-logo.png';
 import UserContext from "@/contexts/user";
@@ -21,7 +22,10 @@ export default function Login() {
   const loc = useLocation();
   const nav = useNavigate();
   const [qrcodeImg, setQrcodeImg] = useState<string | undefined>(undefined);
-  const [uuid, setUuid] = useState<string>("");
+  const [uuid, setUuid] = useState<string | undefined>(undefined);
+  const [errMessage, setErrMessage] = useState<string | undefined>(undefined);
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const cnt = useRef<number>(0);
 
   const message = useContext(MessageContext);
   const userCtx = useContext(UserContext);
@@ -29,6 +33,27 @@ export default function Login() {
   useEffect(() =>{
     loginbyjac();
   }, []);
+
+  useEffect(()=>{
+    if (uuid != undefined)
+    {
+      cnt.current = 0;
+      const id = setInterval(() => {
+        cnt.current += 1;
+        if (cnt.current > 100) {
+          setErrMessage("登录超时，请刷新页面重试");
+          setUuid(undefined);
+        }
+        onJacLoginFinish(false);
+      }, 800);
+      setTimer(id);
+  
+      return () => {
+        clearInterval(id);
+        setTimer(null);
+      };
+    }
+  }, [uuid]);
 
   const getJacLoginForm = function() {
     return (
@@ -61,7 +86,7 @@ export default function Login() {
       </Flex>
       <Form
         name="login"
-        onFinish={onJacLoginFinish}
+        onFinish={() => {onJacLoginFinish(true);}}
         autoComplete="off"
         layout="vertical"
         requiredMark={false}
@@ -77,10 +102,29 @@ export default function Login() {
         </Form.Item>
 
         <Form.Item style={{marginBottom: "16px", textAlign: "center"}}>
-          <img className="qrcode" src={qrcodeImg} />
+          {
+            errMessage == undefined ? (
+              uuid == undefined ? 
+                <Spin tip="加载中">
+                  <img width={228} height={228} className="qrcode" src={qrcodeImg} />
+                </Spin>
+                : <img width={228} height={228} className="qrcode" src={qrcodeImg} />
+            ) : (
+              <Result
+                status="error"
+                title="登录失败"
+                subTitle={errMessage}
+                extra={[
+                  <Button type="primary" onClick={() => { window.location.reload(); }}>
+                    刷新页面
+                  </Button>
+                ]}
+              />
+            )
+          }
         </Form.Item>
 
-        <Form.Item style={{ marginBottom: '0px' }}>
+        <Form.Item style={{ marginBottom: '0px' }} hidden={errMessage != undefined}>
           <Button type="primary" htmlType="submit" block>
             验证
           </Button>
@@ -91,6 +135,7 @@ export default function Login() {
   }
 
   const loginbyjac = () => {
+    setQrcodeImg(code_inactive);
     userLoginByJac()
       .then((data)=>{
         setUuid(data.uuid);
@@ -101,14 +146,16 @@ export default function Login() {
       .catch((err) => { message.error(err); })
   }
 
-  const onJacLoginFinish = (values: any) => {
-    userLoginByJacValidate(uuid)
+  const onJacLoginFinish = (showErrMessage: boolean) => {
+    userLoginByJacValidate(uuid!)
       .then((data)=>{
         message.success('登录成功，跳转中……');
         userCtx.setLogined(true);
-        nav("/main/start")
+        nav("/main/start");
       })
-      .catch((err) => { message.error(err); })
+      .catch((err) => { 
+        if (showErrMessage) message.error(err); 
+      })
   };
 
   return (
@@ -153,11 +200,14 @@ export default function Login() {
           {getJacLoginForm()}
       </div>
     </Content>
-    <div style={{position: "relative"}}>
-      <div style={{position: "absolute", bottom: 4, right: 16}}>
-        {/* <p style={{color: "#CCC"}}>Photo by @Nereise</p> */}
-        <p style={{color: "#EEE", textShadow: "1px 1px 10px #000"}}>Photo by 上海交通大学 Minecraft 社</p>
-      </div>
+    <div style={{position: "absolute", bottom: 4, right: 16}}>
+      {/* <p style={{color: "#CCC"}}>Photo by @Nereise</p> */}
+      <p style={{color: "#EEE", textShadow: "1px 1px 10px #000"}}>
+        Photo by <a href="https://mc.sjtu.cn/" target="_blank" style={{textDecoration: 'none', color: 'inherit'}}>上海交通大学 Minecraft 社</a>
+      </p>
+    </div>
+    <div style={{position: "absolute", top: 16, right: 16}}>
+      <Button shape="circle" icon={<MoonOutlined />} />
     </div>
   </Layout>
   </ConfigProvider>
