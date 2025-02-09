@@ -1,16 +1,15 @@
-import { ListOutputDto, OutputDto, PartialListOutputDto } from "@/models/common";
+import { ListOutputDto, OutputDto } from "@/models/common";
 import { SyncTask, SyncTaskDbModel } from "@/models/sync-task/sync-task";
-import { SyncTaskListDto } from "@/models/sync-task/sync-task-list";
 import { objectToFormData } from "@/utils/formhelper";
 import axios from "axios";
 
 const baseurl = import.meta.env.VITE_API_URI;
 
-//获取任务列表信息
-export async function taskListInfo(type: string) {
+//获取任务信息
+export async function taskInfo(id: number) {
   try {
-    const resp = await axios.get<OutputDto<SyncTaskListDto>>(
-      baseurl + '/tasklist/list?type=' + type,
+    const resp = await axios.get<OutputDto<SyncTask>>(
+      baseurl + '/task/info?id=' + id.toString(),
       {withCredentials : true}
     )
     
@@ -22,16 +21,19 @@ export async function taskListInfo(type: string) {
     return resp.data.result;
   } catch (error) {
     if (error == "NotLoginedError") throw error;
-    var errmessage = `获取任务列表失败：${error}`
+    var errmessage = `获取任务信息失败：${error}`
     throw errmessage;
   }
 };
 
-//启动队列
-export async function taskListStartAll() {
+//添加任务
+export async function taskAdd(path: string) {
   try {
-    const resp = await axios.post<OutputDto<boolean>>(
-      baseurl + '/tasklist/startall',
+    const resp = await axios.post<OutputDto<SyncTaskDbModel>>(
+      baseurl + '/task/add',
+      objectToFormData({
+        path: path
+      }),
       {withCredentials : true}
     )
     
@@ -41,16 +43,19 @@ export async function taskListStartAll() {
 
     return resp.data.result;
   } catch (error) {
-    var errmessage = `启动队列失败：${error}`
+    var errmessage = `启动任务失败：${error}`
     throw errmessage;
   }
 };
 
-//暂停队列
-export async function taskListPauseAll() {
+//启动任务
+export async function taskStart(id: number) {
   try {
     const resp = await axios.post<OutputDto<boolean>>(
-      baseurl + '/tasklist/pauseall',
+      baseurl + '/task/start',
+      objectToFormData({
+        id: id
+      }),
       {withCredentials : true}
     )
     
@@ -60,16 +65,19 @@ export async function taskListPauseAll() {
 
     return resp.data.result;
   } catch (error) {
-    var errmessage = `暂停队列失败：${error}`
+    var errmessage = `启动任务失败：${error}`
     throw errmessage;
   }
 };
 
-//删除所有任务
-export async function taskListCancelAll() {
+//暂停任务
+export async function taskPause(id: number) {
   try {
     const resp = await axios.post<OutputDto<boolean>>(
-      baseurl + '/tasklist/cancelall',
+      baseurl + '/task/pause',
+      objectToFormData({
+        id: id
+      }),
       {withCredentials : true}
     )
     
@@ -79,16 +87,19 @@ export async function taskListCancelAll() {
 
     return resp.data.result;
   } catch (error) {
-    var errmessage = `删除所有任务失败：${error}`
+    var errmessage = `暂停任务失败：${error}`
     throw errmessage;
   }
 };
 
-//重试所有失败任务
-export async function taskListRestartAllErr(keepProgress: boolean) {
+//删除任务
+export async function taskCancel(id: number) {
   try {
     const resp = await axios.post<OutputDto<boolean>>(
-      baseurl + '/tasklist/restartallerr' + `?keepProgress=${keepProgress}`,
+      baseurl + '/task/cancel',
+      objectToFormData({
+        id: id
+      }),
       {withCredentials : true}
     )
     
@@ -98,16 +109,20 @@ export async function taskListRestartAllErr(keepProgress: boolean) {
 
     return resp.data.result;
   } catch (error) {
-    var errmessage = `重试所有失败任务失败：${error}`
+    var errmessage = `删除任务失败：${error}`
     throw errmessage;
   }
 };
 
-//取消所有失败任务
-export async function taskListCancelAllErr() {
+//重试失败任务
+export async function taskRestartErr(id: number, keepProgress: boolean) {
   try {
     const resp = await axios.post<OutputDto<boolean>>(
-      baseurl + '/tasklist/cancelallerr',
+      baseurl + '/task/restarterr',
+      objectToFormData({
+        id: id,
+        keepProgress: keepProgress
+      }),
       {withCredentials : true}
     )
     
@@ -117,16 +132,19 @@ export async function taskListCancelAllErr() {
 
     return resp.data.result;
   } catch (error) {
-    var errmessage = `取消所有失败任务失败：${error}`
+    var errmessage = `重试失败任务失败：${error}`
     throw errmessage;
   }
 };
 
-//删除已完成任务
-export async function taskListDeleteAllDone() {
+//取消失败任务
+export async function taskCancelErr(id: number) {
   try {
     const resp = await axios.post<OutputDto<boolean>>(
-      baseurl + '/tasklist/deletealldone',
+      baseurl + '/task/cancelerr',
+      objectToFormData({
+        id: id,
+      }),
       {withCredentials : true}
     )
     
@@ -136,18 +154,20 @@ export async function taskListDeleteAllDone() {
 
     return resp.data.result;
   } catch (error) {
-    var errmessage = `删除已完成任务失败：${error}`
+    var errmessage = `取消失败任务失败：${error}`
     throw errmessage;
   }
 };
 
-//查询任务
-export async function taskListSearch(data: any) {
+//优先传输
+export async function taskSetTop(id: number) {
   try {
-    const resp = await axios.post<PartialListOutputDto<SyncTaskDbModel>>(
-      baseurl + '/tasklist/querydb',
-      objectToFormData(data),
-      {withCredentials : true},
+    const resp = await axios.post<OutputDto<boolean>>(
+      baseurl + '/task/settop',
+      objectToFormData({
+        id: id,
+      }),
+      {withCredentials : true}
     )
     
     if (resp.status != 200) throw `请求失败`;
@@ -156,8 +176,7 @@ export async function taskListSearch(data: any) {
 
     return resp.data.result;
   } catch (error) {
-    var errmessage = `查询任务失败：${error}`
+    var errmessage = `优先传输失败：${error}`
     throw errmessage;
   }
 };
-

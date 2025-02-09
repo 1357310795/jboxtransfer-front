@@ -1,17 +1,18 @@
 import { MessageContext } from "@/contexts/message";
 import { NotificationContext } from "@/contexts/notification";
-import { SyncTask, SyncTaskState } from "@/models/sync-task/sync-task";
+import { SyncTask } from "@/models/sync-task/sync-task";
 import { taskListCancelAll, taskListCancelAllErr, taskListDeleteAllDone, taskListInfo, taskListPauseAll, taskListRestartAllErr, taskListStartAll } from "@/services/task-list";
 import FileIcon from "@/utils/fileicon";
 import { PageContainer, ProColumns, ProTable, TableDropdown } from "@ant-design/pro-components";
 import { Button, Flex, Space, Typography, Image, Progress, Dropdown, Popconfirm, Modal, Tooltip, Badge } from "antd";
-import { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom";
 import folderIcon from "@/assets/folder.svg";
-import { CloseCircleFilled, CopyOutlined, ExportOutlined, PauseCircleFilled, PlayCircleFilled, PlayCircleOutlined, SyncOutlined } from "@ant-design/icons";
+import { CloseCircleFilled, CopyOutlined, ExportOutlined, PauseCircleFilled, PlayCircleFilled, SyncOutlined } from "@ant-design/icons";
 import prettyBytes from "pretty-bytes";
 import { ModalContext } from "@/contexts/modal";
-import { taskCancel, taskCancelErr, taskJboxLink, taskPause, taskRestartErr, taskSetTop, taskStart, taskTboxLink } from "@/services/task";
+import { taskCancel, taskCancelErr, taskPause, taskRestartErr, taskSetTop, taskStart } from "@/services/task";
+import { getJboxItemLink, getTboxItemLink } from "@/services/cloud";
 
 export default function TaskList(props: any) {
   const nav = useNavigate();
@@ -166,8 +167,8 @@ export default function TaskList(props: any) {
             key="actionGroup"
             menus={[
               { key: 'settop', name: '优先传输', onClick: () => {onSetTop(entity.id)}, disabled: (busyButton == `settop_${entity.id}`) },
-              { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
-              { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
+              { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.filePath)}, disabled: (busyButton == `jboxlink_${entity.filePath}`) },
+              { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.filePath)}, disabled: (busyButton == `tboxlink_${entity.filePath}`) },
               { key: 'copypath', name: '复制完整路径', onClick: () => {onCopyPath(entity)} },
             ]}
           />,
@@ -178,8 +179,8 @@ export default function TaskList(props: any) {
             placement="bottomLeft" 
             arrow
             menu={{items: [
-              { key: 'openinjbox', label: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
-              { key: 'openintbox', label: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
+              { key: 'openinjbox', label: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.filePath)}, disabled: (busyButton == `jboxlink_${entity.filePath}`) },
+              { key: 'openintbox', label: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.filePath)}, disabled: (busyButton == `tboxlink_${entity.filePath}`) },
             ]}}
           >
             <Button variant="outlined" style={{padding: '4px 8px'}} color="default" icon={<ExportOutlined />}>
@@ -228,8 +229,8 @@ export default function TaskList(props: any) {
           <TableDropdown
             key="actionGroup"
             menus={[
-              { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.id)}, disabled: (busyButton == `jboxlink_${entity.id}`) },
-              { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.id)}, disabled: (busyButton == `tboxlink_${entity.id}`) },
+              { key: 'openinjbox', name: '在旧云盘中打开', onClick: () => {onGetJboxLink(entity.filePath)}, disabled: (busyButton == `jboxlink_${entity.filePath}`) },
+              { key: 'openintbox', name: '在新云盘中打开', onClick: () => {onGetTboxLink(entity.filePath)}, disabled: (busyButton == `tboxlink_${entity.filePath}`) },
               { key: 'copypath', name: '复制完整路径', onClick: ()=>{onCopyPath(entity)} },
             ]}
           />,
@@ -550,11 +551,11 @@ export default function TaskList(props: any) {
       });
   };
   
-  const onGetJboxLink = (id: number) => {
-    setBusyButton(`jboxlink_${id}`);
-    taskJboxLink(id)
+  const onGetJboxLink = (path: string) => {
+    setBusyButton(`jboxlink_${path}`);
+    getJboxItemLink(path)
       .then((data) => { 
-        // 打开新网页
+        window.open(data, "_blank");
       })
       .catch((err) => { 
         message.error(err); 
@@ -564,11 +565,11 @@ export default function TaskList(props: any) {
       });
   };
   
-  const onGetTboxLink = (id: number) => {
-    setBusyButton(`tboxlink_${id}`);
-    taskTboxLink(id)
+  const onGetTboxLink = (path: string) => {
+    setBusyButton(`tboxlink_${path}`);
+    getTboxItemLink(path)
       .then((data) => { 
-        // 打开新网页
+        window.open(data, "_blank");
       })
       .catch((err) => { 
         message.error(err); 

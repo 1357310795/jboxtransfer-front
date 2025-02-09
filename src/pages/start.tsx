@@ -1,6 +1,6 @@
-import { Flex, Space, Image, Typography, Button, Row, Col, Divider, Progress } from "antd";
+import { Flex, Space, Image, Typography, Button, Row, Col, Divider, Progress, Tooltip } from "antd";
 import logo from "@/assets/tboxtransfer-logo.png"
-import { CloudSyncOutlined, FolderAddOutlined, GlobalOutlined, LoginOutlined } from "@ant-design/icons";
+import { CloudSyncOutlined, FolderAddOutlined, GlobalOutlined, InfoCircleFilled, LoginOutlined } from "@ant-design/icons";
 import FeatureCard from "@/components/feature-card";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
@@ -104,7 +104,13 @@ export default function Start(props: any) {
 				{ stat &&
 					<Space size={24} direction='vertical' align="center" >
 						<Typography.Title level={4}>
-							{stat.onlyFullTransfer ? "正在全量迁移中" : "正在迁移中"}
+							{/* {stat.onlyFullTransfer ? "正在全量迁移中" : "正在迁移中"} */}
+							{"迁移进度"}
+							{stat.onlyFullTransfer ? undefined : 
+								<Tooltip title="当前非全量迁移，进度仅供参考">
+									<InfoCircleFilled style={{fontSize: '16px'}} />
+								</Tooltip>
+							}
 						</Typography.Title>
 						<Progress type="dashboard" percent={Math.round(stat.totalTransferredBytes / stat.jboxSpaceUsedBytes * 10000) / 100} />
 						<Typography.Title level={5}>
