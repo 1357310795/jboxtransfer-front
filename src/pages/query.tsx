@@ -2,9 +2,9 @@ import { MessageContext } from "@/contexts/message";
 import { ModalContext } from "@/contexts/modal";
 import { NotificationContext } from "@/contexts/notification";
 import { SyncTaskDbModel } from "@/models/sync-task/sync-task";
-import { PageContainer, ProColumns, ProTable, TableDropdown } from "@ant-design/pro-components";
+import { PageContainer, ProColumns, ProFormInstance, ProTable, TableDropdown } from "@ant-design/pro-components";
 import { Button, Dropdown, Flex, Image, Space, Tooltip, Typography } from "antd";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import folderIcon from "@/assets/folder.svg";
 import FileIcon from "@/utils/fileicon";
@@ -16,9 +16,9 @@ import { getJboxItemLink, getTboxItemLink } from "@/services/cloud";
 
 const stateQueryValueEnum = {
   All: { text: '全部' },
-  Idle: { text: '等待中', status: 'default' },
-  Pending: { text: '排队中', color: 'cyan' },
-  Busy: { text: '传输中', status: 'Processing' },
+  Idle: { text: '等待中', status: 'cyan' },
+  Pending: { text: '排队中', color: 'purple' },
+  Busy: { text: '传输中', status: 'processing' },
   Error: { text: '已停止', color: 'red' },
   Done: { text: '已完成', color: 'green' },
   Cancel: { text: '已取消', color: 'magenta' },
@@ -31,6 +31,7 @@ export default function Query(props: any) {
   const modal = useContext(ModalContext);
   const [taskListData, setTaskListData] = useState<SyncTaskDbModel[]>([]);
   const [busyButton, setBusyButton] = useState<string>("");
+  const formRef = useRef<ProFormInstance>();
 
 	const getItemAction = (entity: SyncTaskDbModel) => {
     switch (entity.state)
@@ -239,6 +240,7 @@ export default function Query(props: any) {
     taskCancel(id)
       .then((data) => { 
         message.success("操作成功"); 
+        formRef.current?.submit();
       })
       .catch((err) => { 
         message.error(err); 
@@ -262,7 +264,6 @@ export default function Query(props: any) {
       });
   };
   
-
   const onGetJboxLink = (path: string) => {
     setBusyButton(`jboxlink_${path}`);
     getJboxItemLink(path)
@@ -338,6 +339,7 @@ export default function Query(props: any) {
           toolBarRender={() => [
             
           ]}
+          formRef={formRef}
         />
       </div>
     </PageContainer>

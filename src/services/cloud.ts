@@ -5,10 +5,10 @@ import axios from "axios";
 const baseurl = import.meta.env.VITE_API_URI;
 
 //列出Jbox目录
-export async function listJboxItems(path: string) {
+export async function listJboxItems(path: string, page: number, pageSize: number) {
   try {
     const resp = await axios.get<OutputDto<FileSystemItem>>(
-      baseurl + '/cloud/jbox/list' + `?path=${path}`,
+      baseurl + '/cloud/jbox/list' + `?path=${path}&page=${page}&pageSize=${pageSize}`,
       {withCredentials : true},
     )
     
@@ -24,10 +24,10 @@ export async function listJboxItems(path: string) {
 };
 
 //列出Tbox目录
-export async function listTboxItems(path: string) {
+export async function listTboxItems(path: string, page: number, pageSize: number) {
   try {
     const resp = await axios.get<OutputDto<FileSystemItem>>(
-      baseurl + '/cloud/tbox/list' + `?path=${path}`,
+      baseurl + '/cloud/tbox/list' + `?path=${path}&page=${page}&pageSize=${pageSize}`,
       {withCredentials : true},
     )
     

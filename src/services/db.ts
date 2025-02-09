@@ -9,7 +9,7 @@ const baseurl = import.meta.env.VITE_API_URI;
 export async function taskListSearch(data: any) {
   try {
     const resp = await axios.post<PartialListOutputDto<SyncTaskDbModel>>(
-      baseurl + '/tasklist/querydb',
+      baseurl + '/db/query',
       objectToFormData(data),
       {withCredentials : true},
     )

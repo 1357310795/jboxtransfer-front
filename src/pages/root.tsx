@@ -1,5 +1,4 @@
 import {
-    CloudFilled,
     CloudServerOutlined,
     CloudSyncOutlined,
     GithubOutlined,
@@ -8,24 +7,18 @@ import {
     InfoCircleFilled,
     LogoutOutlined,
     MoonFilled,
-    MoonOutlined,
     SearchOutlined,
-    SettingFilled,
     SettingOutlined,
-    SmileFilled,
     SunFilled,
-    SunOutlined,
 } from '@ant-design/icons';
 import type { ProSettings } from '@ant-design/pro-components';
 import {
     ProConfigProvider,
     ProLayout,
-    SettingDrawer,
 } from '@ant-design/pro-components';
 import {
     ConfigProvider,
     Dropdown,
-    theme,
     Tooltip,
 } from 'antd';
 import { useContext, useState } from 'react';
@@ -34,7 +27,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import UserContext from '@/contexts/user';
 import userIcon from "@/assets/user-filling.svg"
 import type { RouterTypes } from '@ant-design/pro-layout/es/typing';
-import useLocalStorage from '@/hooks/useLocalStorage';
 import ThemeContext from '@/contexts/theme';
 
 const menuProps: RouterTypes = {
@@ -85,13 +77,13 @@ const menuProps: RouterTypes = {
           name: "帮助",
           children: [
             {
-              key: '#',
+              key: '#pan',
               path: 'https://pan.sjtu.edu.cn/jboxtransfer/',
               name: '使用指南',
               icon: <GlobalOutlined />,
             },
             {
-              key: '#',
+              key: '#github',
               path: 'https://github.com/1357310795/JboxTransfer',
               name: '开源地址',
               icon: <GithubOutlined />,

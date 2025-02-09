@@ -7,4 +7,5 @@ export interface FileSystemItem {
   updateTime?: string;
   contents?: FileSystemItem[];
   totalCount: number;
+  syncState?: string;
 }
