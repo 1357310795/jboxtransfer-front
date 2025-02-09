@@ -35,6 +35,7 @@ import UserContext from '@/contexts/user';
 import userIcon from "@/assets/user-filling.svg"
 import type { RouterTypes } from '@ant-design/pro-layout/es/typing';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import ThemeContext from '@/contexts/theme';
 
 const menuProps: RouterTypes = {
     route: {
@@ -171,7 +172,7 @@ export default function Root(props: any) {
     const loc = useLocation();
     const nav = useNavigate();
     const user = useContext(UserContext);
-    const [userTheme, setUserTheme] = useLocalStorage("theme-mode", "light");
+    const theme = useContext(ThemeContext);
 
     if (typeof document === 'undefined') {
       return <div />;
@@ -190,11 +191,6 @@ export default function Root(props: any) {
           <ConfigProvider
             getTargetContainer={() => {
               return document.getElementById('test-pro-layout') || document.body;
-            }}
-            theme={{
-              cssVar: true,
-              algorithm: userTheme === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
-              token: { colorPrimary: "#1677FF", colorInfo: "#1677FF", screenXXLMin: 1920, screenXXL: 2560, },
             }}
           >
             <ProLayout
@@ -269,7 +265,7 @@ export default function Root(props: any) {
                   // <Tooltip title="新云盘网页">
                   //   <CloudFilled key="InfoCircleFilled" onClick={()=>{window.open('https://pan.sjtu.edu.cn', '_blank')}} />
                   // </Tooltip>,
-                  (userTheme === 'light' ? <MoonFilled onClick={()=>{setUserTheme("dark")}}/> : <SunFilled onClick={()=>{setUserTheme("light")}}/>)
+                  (theme.userTheme === 'light' ? <MoonFilled onClick={()=>{theme.changeTheme("dark")}}/> : <SunFilled onClick={()=>{theme.changeTheme("light")}}/>)
                 ];
               }}
               logo={logo}

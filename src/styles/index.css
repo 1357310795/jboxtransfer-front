@@ -10,9 +10,9 @@ body {
     height: 100%;
     margin: auto;
     padding: 0px 16px;
-    background-color: rgba(255, 255, 255, 0.6);
+    /* background-color: rgba(255, 255, 255, 0.6);
     box-shadow: hsla(218, 31%, 5%, 0.05) 0px 5px 15px 0px,
-      hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px;
+      hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px; */
 }
 
 .logo-container {

@@ -5,17 +5,20 @@ import { NotificationContextProvider } from './contexts/notification'
 import { UserContextProvider } from './contexts/user'
 import { MessageContextProvider } from './contexts/message'
 import { ModalContextProvider } from './contexts/modal'
+import { ThemeContextProvider } from './contexts/theme'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ModalContextProvider>
-      <MessageContextProvider>
-        <NotificationContextProvider>
-          <UserContextProvider>
-            <App />
-          </UserContextProvider>
-        </NotificationContextProvider>
-      </MessageContextProvider>
-    </ModalContextProvider>
+    <ThemeContextProvider>
+      <ModalContextProvider>
+        <MessageContextProvider>
+          <NotificationContextProvider>
+            <UserContextProvider>
+              <App />
+            </UserContextProvider>
+          </NotificationContextProvider>
+        </MessageContextProvider>
+      </ModalContextProvider>
+    </ThemeContextProvider>
   </StrictMode>,
 )
