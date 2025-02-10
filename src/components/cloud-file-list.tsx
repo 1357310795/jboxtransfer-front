@@ -31,7 +31,7 @@ const stateEnums: {[key: string]: BadgeProps} = {
   Idle: { text: '等待中', status: undefined, color: 'cyan' },
   Pending: { text: '排队中', status: undefined, color: 'purple' },
   Busy: { text: '传输中', status: 'processing', color: undefined },
-  Error: { text: '已停止', status: undefined, color: 'red' },
+  Error: { text: '出错', status: undefined, color: 'red' },
   Done: { text: '已完成', status: undefined, color: 'green' },
   Cancel: { text: '已取消', status: undefined, color: 'magenta' },
 };

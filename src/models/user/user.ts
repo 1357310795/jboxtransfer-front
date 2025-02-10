@@ -8,10 +8,16 @@ export interface UserInfoDto {
     role: string;
     jaccount: string;
     avatar: string;
+    preference: string;
 }
 
 export interface UserStatDto {
     totalTransferredBytes: number;
     jboxSpaceUsedBytes: number;
     onlyFullTransfer: boolean;
+}
+
+export interface UserPreferenceDto {
+    concurrencyCount: number;
+    conflictResolutionStrategy: string;
 }

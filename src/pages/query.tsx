@@ -16,7 +16,7 @@ import { getJboxItemLink, getTboxItemLink } from "@/services/cloud";
 
 const stateQueryValueEnum = {
   All: { text: '全部' },
-  Idle: { text: '等待中', status: 'cyan' },
+  Idle: { text: '等待中', color: 'cyan' },
   Pending: { text: '排队中', color: 'purple' },
   Busy: { text: '传输中', status: 'processing' },
   Error: { text: '已停止', color: 'red' },

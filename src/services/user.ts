@@ -1,5 +1,5 @@
 import { OutputDto } from "@/models/common";
-import { JaccountQrCodeDataDto, UserInfoDto, UserStatDto } from "@/models/user/user";
+import { JaccountQrCodeDataDto, UserInfoDto, UserPreferenceDto, UserStatDto } from "@/models/user/user";
 import { objectToFormData } from "@/utils/formhelper";
 import axios from "axios";
 
@@ -98,6 +98,26 @@ export async function userGetStatistics() {
     return resp.data.result;
   } catch (error) {
     var errmessage = `获取统计数据失败：${error}`
+    throw errmessage;
+  }
+};
+  
+//更新设置
+export async function userUpdatePreference(data: UserPreferenceDto) {
+  try {
+    const resp = await axios.put<OutputDto<UserInfoDto>>(
+      baseurl + '/user/updatepreference',
+      data,
+      {withCredentials : true}
+    )
+    
+    if (resp.status != 200) throw `请求失败`;
+    if (resp.data.isError) throw `${resp.data.message}`;
+    if (!resp.data.result) throw `数据为空`;
+
+    return resp.data.result;
+  } catch (error) {
+    var errmessage = `更新设置失败：${error}`
     throw errmessage;
   }
 };

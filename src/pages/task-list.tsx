@@ -25,6 +25,7 @@ export default function TaskList(props: any) {
   const [busyButton, setBusyButton] = useState<string>("");
   const [restartModalOpen, setRestartModalOpen] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
+  const [isTooManyError, setIsTooManyError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [runningCount, setRunningCount] = useState<number>(0);
   const [completedCount, setCompletedCount] = useState<number>(0);
@@ -348,6 +349,20 @@ export default function TaskList(props: any) {
         setTimer(null);
       };
   }, [selectedTab]);
+
+  useEffect(()=>{
+    if (errorCount > 99 && !isTooManyError) {
+      noti.error({
+        message: "错误过多，队列被迫终止",
+        description: "请先前往“已停止”页面处理出错的项目，再继续启动传输",
+        duration: null,
+      });
+      setIsTooManyError(true);
+    }
+    else {
+      setIsTooManyError(false);
+    }
+  }, [errorCount]);
 
   const updateData = (listType: string) => {
     taskListInfo(listType)
