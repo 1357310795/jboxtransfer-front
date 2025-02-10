@@ -27,13 +27,14 @@ jobs:
           path: dist
       - name: Pack Assets
         run: |
-          zip -r jboxtransfer-front-build.zip ./dist
+          cd ./dist
+          zip -r jboxtransfer-front-build.zip .
       - name: Upload Release Assets
         uses: shogo82148/actions-upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./jboxtransfer-front-build.zip
+          asset_path: ./dist/jboxtransfer-front-build.zip
           asset_name: jboxtransfer-front-build.zip
           asset_content_type: application/zip
