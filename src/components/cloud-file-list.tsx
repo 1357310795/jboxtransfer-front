@@ -272,7 +272,7 @@ export default function CloudFileList(props: CloudFileListProps) {
               title="操作失败"
               // subTitle={errMessage}
               extra={[
-                <Button type="primary" onClick={() => { navToPath("/"); setIsError(false); }}>
+                <Button key="backtoroot" type="primary" onClick={() => { navToPath("/"); setIsError(false); }}>
                   返回根目录
                 </Button>
               ]}

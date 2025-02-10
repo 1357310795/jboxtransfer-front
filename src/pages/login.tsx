@@ -121,7 +121,7 @@ export default function Login() {
                 title="登录失败"
                 subTitle={errMessage}
                 extra={[
-                  <Button type="primary" onClick={() => { window.location.reload(); }}>
+                  <Button key="refresh" type="primary" onClick={() => { window.location.reload(); }}>
                     刷新页面
                   </Button>
                 ]}

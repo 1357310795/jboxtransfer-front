@@ -25,7 +25,7 @@ export default function Setting() {
               title="请先登录"
               // subTitle={errMessage}
               extra={[
-                <Button type="primary" onClick={() => { nav("/login"); }}>
+                <Button key="login" type="primary" onClick={() => { nav("/login"); }}>
                   前往登录
                 </Button>
               ]}

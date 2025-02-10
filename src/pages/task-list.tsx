@@ -620,10 +620,6 @@ export default function TaskList(props: any) {
       </Modal>
     <PageContainer
       title="任务列表"
-      extra={[
-				
-      ]}
-      // subTitle="简单的描述"
       tabList={[
         {
           tab: '传输中',

@@ -105,6 +105,7 @@ export default function Query(props: any) {
             style={{padding: '4px 8px'}} 
             color="default" 
             icon={<RedoOutlined />}
+            hidden={true}
             onClick={()=>{ /* Todo */ }}
           >
             重新添加任务
@@ -301,9 +302,6 @@ export default function Query(props: any) {
     <>
     <PageContainer
       title="任务查询"
-      extra={[
-				
-      ]}
 		>
       <div>
         <ProTable<SyncTaskDbModel>
