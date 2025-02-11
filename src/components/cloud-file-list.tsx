@@ -28,6 +28,7 @@ interface TableParams {
 
 const stateEnums: {[key: string]: BadgeProps} = {
   None: { text: '未迁移', status: 'default', color: undefined },
+  Unknown: { text: '未知', status: 'default', color: undefined },
   Idle: { text: '等待中', status: undefined, color: 'cyan' },
   Pending: { text: '排队中', status: undefined, color: 'purple' },
   Busy: { text: '传输中', status: 'processing', color: undefined },
