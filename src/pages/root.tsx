@@ -291,7 +291,12 @@ export default function Root(props: any) {
                     }}
                   >
                     <div>© 2025 上海交通大学网络信息中心</div>
-                    <div style={{fontSize: '0.8em', marginTop: '6px'}}>技术支持：思源极客学生信息技术协会</div>
+                    <div style={{fontSize: '0.8em', marginTop: '6px'}}>
+                      技术支持：
+                      <a href='https://affairs.sjtu.edu.cn/index.php?m=app&v=aboutus&mid=69' style={{color: "inherit", textDecoration: "none"}}>
+                        思源极客学生信息技术协会
+                      </a>
+                    </div>
                   </div>
                 );
               }}
