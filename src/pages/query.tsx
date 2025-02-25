@@ -19,6 +19,7 @@ const stateQueryValueEnum = {
   Idle: { text: '等待中', color: 'cyan' },
   Pending: { text: '排队中', color: 'purple' },
   Busy: { text: '传输中', status: 'processing' },
+  PartDone: { text: '部分完成', color: 'lime' },
   Error: { text: '已停止', color: 'red' },
   Done: { text: '已完成', color: 'green' },
   Cancel: { text: '已取消', color: 'magenta' },
@@ -29,7 +30,6 @@ export default function Query(props: any) {
   const noti = useContext(NotificationContext);
   const message = useContext(MessageContext);
   const modal = useContext(ModalContext);
-  const [taskListData, setTaskListData] = useState<SyncTaskDbModel[]>([]);
   const [busyButton, setBusyButton] = useState<string>("");
   const formRef = useRef<ProFormInstance>();
 
@@ -177,6 +177,7 @@ export default function Query(props: any) {
       hideInForm: true,
       hideInTable: true,
       valueType: "text",
+      initialValue: "/",
       formItemProps: {
         rules: [
           {
