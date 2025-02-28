@@ -61,7 +61,7 @@ export default function TaskList(props: any) {
               variant="dashed"
               loading={busyButton == "cancelall"}
               onClick={async ()=>{ 
-                var res = await modal.confirm({title: "数据删除确认", content: "此操作将删除所有传输中、待传输和出错的项目，是否确定？", cancelText: "取消", okText: "确定"});
+                var res = await modal.confirm({title: "数据删除确认", content: "此操作将删除所有传输中和待传输的项目，是否确定？", cancelText: "取消", okText: "确定"});
                 if (res) onCancelAll(); 
               }}
             >

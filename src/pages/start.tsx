@@ -44,7 +44,7 @@ export default function Start() {
 	const onAddTask = (path: string) => {
 		taskAdd(path)
 			.then((data) => { 
-				message.info("添加成功，请前往“任务列表”页面启动队列！");
+				message.info("添加成功，请前往“任务列表”页面查看！");
 			})
 			.catch((err) => { 
 				message.error(err); 
