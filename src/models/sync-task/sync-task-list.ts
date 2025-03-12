@@ -9,6 +9,7 @@ export interface SyncTaskListDto
   runningCount: number;
   completedCount: number;
   errorCount: number;
+  jboxLag: boolean;
   total: number;
   entities: SyncTask[];
 }

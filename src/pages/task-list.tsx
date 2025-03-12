@@ -30,6 +30,7 @@ export default function TaskList(props: any) {
   const [runningCount, setRunningCount] = useState<number>(0);
   const [completedCount, setCompletedCount] = useState<number>(0);
   const [errorCount, setErrorCount] = useState<number>(0);
+  const [jboxLag, setJboxLag] = useState<boolean>(false);
 
   const getCurrentTabAction = () => {
     switch (selectedTab)
@@ -364,6 +365,16 @@ export default function TaskList(props: any) {
     }
   }, [errorCount]);
 
+  useEffect(()=>{
+    if (jboxLag) {
+      noti.warning({
+        message: "注意：当前传输缓慢",
+        description: "由于目前用户较多，jbox 系统负载过高，导致传输缓慢，建议您错峰迁移以提高效率",
+        duration: null,
+      });
+    }
+  }, [jboxLag]);
+
   const updateData = (listType: string) => {
     taskListInfo(listType)
       .then((data) => { 
@@ -375,6 +386,7 @@ export default function TaskList(props: any) {
         {
           setHasMore(data.hasMore);
           setTaskListData(data.entities.filter(x => x.state != "Error" && x.state != "Complete"));
+          setJboxLag(data.jboxLag);
         }
         else if (selectedTab == "completed")
         {
