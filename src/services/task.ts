@@ -180,3 +180,25 @@ export async function taskSetTop(id: number) {
     throw errmessage;
   }
 };
+
+//恢复取消的任务
+export async function taskRenew(id: number) {
+  try {
+    const resp = await axios.post<OutputDto<boolean>>(
+      baseurl + '/task/renew',
+      objectToFormData({
+        id: id,
+      }),
+      {withCredentials : true}
+    )
+    
+    if (resp.status != 200) throw `请求失败`;
+    if (resp.data.isError) throw `${resp.data.message}`;
+    if (!resp.data.result) throw `数据为空`;
+
+    return resp.data.result;
+  } catch (error) {
+    var errmessage = `恢复任务失败：${error}`
+    throw errmessage;
+  }
+};

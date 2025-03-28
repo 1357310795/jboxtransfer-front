@@ -103,6 +103,25 @@ export async function taskListRestartAllErr(keepProgress: boolean) {
   }
 };
 
+//重试所有失败任务（自动判断）
+export async function taskListRestartAllErrAuto() {
+  try {
+    const resp = await axios.post<OutputDto<boolean>>(
+      baseurl + '/tasklist/restartallerrauto',
+      {withCredentials : true}
+    )
+    
+    if (resp.status != 200) throw `请求失败`;
+    if (resp.data.isError) throw `${resp.data.message}`;
+    if (!resp.data.result) throw `数据为空`;
+
+    return resp.data.result;
+  } catch (error) {
+    var errmessage = `重试所有失败任务失败：${error}`
+    throw errmessage;
+  }
+};
+
 //取消所有失败任务
 export async function taskListCancelAllErr() {
   try {

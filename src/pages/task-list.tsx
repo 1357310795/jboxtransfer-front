@@ -1,7 +1,7 @@
 import { MessageContext } from "@/contexts/message";
 import { NotificationContext } from "@/contexts/notification";
 import { SyncTask } from "@/models/sync-task/sync-task";
-import { taskListCancelAll, taskListCancelAllErr, taskListDeleteAllDone, taskListInfo, taskListPauseAll, taskListRestartAllErr, taskListStartAll } from "@/services/task-list";
+import { taskListCancelAll, taskListCancelAllErr, taskListDeleteAllDone, taskListInfo, taskListPauseAll, taskListRestartAllErr, taskListRestartAllErrAuto, taskListStartAll } from "@/services/task-list";
 import FileIcon from "@/utils/fileicon";
 import { PageContainer, ProColumns, ProTable, TableDropdown } from "@ant-design/pro-components";
 import { Button, Flex, Space, Typography, Image, Progress, Dropdown, Popconfirm, Modal, Tooltip, Badge } from "antd";
@@ -23,7 +23,6 @@ export default function TaskList(props: any) {
   const [taskListData, setTaskListData] = useState<SyncTask[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>("transferring");
   const [busyButton, setBusyButton] = useState<string>("");
-  const [restartModalOpen, setRestartModalOpen] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [isTooManyError, setIsTooManyError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -94,17 +93,22 @@ export default function TaskList(props: any) {
       case "error":
         return (
           <Space>
-            <Button 
-              key="3" 
-              color="primary" 
-              variant="outlined" 
-              loading={busyButton == "restartallerr"}
-              onClick={()=>{ 
-                setRestartModalOpen(true);
-              }}
+            <Popconfirm
+              title="重试任务确认"
+              description="您确定要重试所有出错的任务吗？"
+              onConfirm={() => { onRestartAllErr(); }}
+              okText="是"
+              cancelText="否"
             >
-              全部重试
-            </Button>
+              <Button 
+                key="3" 
+                color="primary" 
+                variant="outlined" 
+                loading={busyButton == "restartallerr"}
+              >
+                全部重试
+              </Button>
+            </Popconfirm>
             <Popconfirm
               title="取消任务确认"
               description="您确定要取消所有出错的任务吗？"
@@ -352,18 +356,14 @@ export default function TaskList(props: any) {
   }, [selectedTab]);
 
   useEffect(()=>{
-    if (errorCount > 99 && !isTooManyError) {
+    if (isTooManyError) {
       noti.error({
         message: "错误过多，队列被迫终止",
         description: "请先前往“已停止”页面处理出错的项目，再继续启动传输",
         duration: null,
       });
-      setIsTooManyError(true);
     }
-    else {
-      setIsTooManyError(false);
-    }
-  }, [errorCount]);
+  }, [isTooManyError]);
 
   useEffect(()=>{
     if (jboxLag) {
@@ -387,6 +387,7 @@ export default function TaskList(props: any) {
           setHasMore(data.hasMore);
           setTaskListData(data.entities.filter(x => x.state != "Error" && x.state != "Complete"));
           setJboxLag(data.jboxLag);
+          setIsTooManyError(data.isTooManyError);
         }
         else if (selectedTab == "completed")
         {
@@ -395,6 +396,7 @@ export default function TaskList(props: any) {
         }
         else if (selectedTab == "error")
         {
+          setHasMore(data.errorCount > data.entities.length);
           setTaskListData(data.entities);
         }
       })
@@ -465,9 +467,9 @@ export default function TaskList(props: any) {
       });
   };
 
-  const onRestartAllErr = (keepProgress : boolean) => {
+  const onRestartAllErr = () => {
     setBusyButton("restartallerr");
-    taskListRestartAllErr(keepProgress)
+    taskListRestartAllErrAuto()
       .then((data) => { 
         message.success("操作成功"); 
       })
@@ -476,7 +478,6 @@ export default function TaskList(props: any) {
       })
       .finally(()=>{
         setBusyButton("");
-        setRestartModalOpen(false);
       });
   };
 
@@ -613,23 +614,6 @@ export default function TaskList(props: any) {
 
   return (
     <>
-      <Modal
-        open={restartModalOpen}
-        title="请选择重试方式"
-        footer={[
-          <Button key="back" onClick={() => { setRestartModalOpen(false); }}>
-            取消
-          </Button>,
-          <Button type="primary" loading={busyButton == "restartallerr"} onClick={() => {onRestartAllErr(true);}}>
-            保留进度
-          </Button>,
-          <Button type="primary" loading={busyButton == "restartallerr"} onClick={() => {onRestartAllErr(false);}}>
-            从头开始
-          </Button>
-        ]}
-      >
-        <p>重试任务时，是否保留已传输的进度？</p>
-      </Modal>
     <PageContainer
       title="任务列表"
       tabList={[

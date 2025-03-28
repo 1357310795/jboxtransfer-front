@@ -3,7 +3,7 @@ import { ModalContext } from "@/contexts/modal";
 import { NotificationContext } from "@/contexts/notification";
 import { SyncTaskDbModel } from "@/models/sync-task/sync-task";
 import { PageContainer, ProColumns, ProFormInstance, ProTable, TableDropdown } from "@ant-design/pro-components";
-import { Button, Dropdown, Flex, Image, Space, Tooltip, Typography } from "antd";
+import { Button, Dropdown, Flex, Image, Input, Modal, Space, Tooltip, Typography } from "antd";
 import { useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import folderIcon from "@/assets/folder.svg";
@@ -11,7 +11,7 @@ import FileIcon from "@/utils/fileicon";
 import { CloseCircleFilled, CopyOutlined, ExportOutlined, RedoOutlined, SyncOutlined, VerticalAlignTopOutlined } from "@ant-design/icons";
 import { taskListSearch } from "@/services/db";
 import prettyBytes from "pretty-bytes";
-import { taskCancel, taskSetTop } from "@/services/task";
+import { taskAdd, taskCancel, taskRenew, taskSetTop } from "@/services/task";
 import { getJboxItemLink, getTboxItemLink } from "@/services/cloud";
 
 const stateQueryValueEnum = {
@@ -31,6 +31,8 @@ export default function Query(props: any) {
   const message = useContext(MessageContext);
   const modal = useContext(ModalContext);
   const [busyButton, setBusyButton] = useState<string>("");
+  const [addTaskModalOpen, setAddTaskModalOpen] = useState<boolean>(false);
+  const [addTaskPath, setAddTaskPath] = useState<string>("");
   const formRef = useRef<ProFormInstance>();
 
 	const getItemAction = (entity: SyncTaskDbModel) => {
@@ -105,10 +107,11 @@ export default function Query(props: any) {
             style={{padding: '4px 8px'}} 
             color="default" 
             icon={<RedoOutlined />}
-            hidden={true}
-            onClick={()=>{ /* Todo */ }}
+            hidden={true}     
+            loading={busyButton == `renew_${entity.id}`}
+            onClick={()=>{ onRenewTask(entity.id) }}
           >
-            重新添加任务
+            恢复任务
           </Button>,
           <Button 
             variant="outlined" 
@@ -298,6 +301,22 @@ export default function Query(props: any) {
     window.navigator.clipboard.writeText(entity.filePath); 
     message.info("已复制到剪切板");
   }
+  
+  const onRenewTask = (id: number) => {
+    setBusyButton(`renew_${id}`);
+    taskRenew(id)
+      .then((data) => { 
+        message.info("操作成功");
+        formRef.current?.submit();
+      })
+      .catch((err) => { 
+        message.error(err); 
+      })
+      .finally(()=>{
+        setBusyButton("");
+        props.setAddTaskModalOpen(false);
+      });
+  };
   
 	return (
     <>
